@@ -9,11 +9,11 @@ import java.awt.Color;
 import java.io.IOException;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-//import org.apache.poi.ss.usermodel.Cell;
-//import org.apache.poi.ss.usermodel.Row;
-//import org.apache.poi.ss.usermodel.Sheet;
-//import org.apache.poi.ss.usermodel.Workbook;
-//import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -313,13 +313,13 @@ public class FrmPrincipal extends javax.swing.JFrame implements ItfPrincipal{
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 808, Short.MAX_VALUE)
+            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 877, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(423, Short.MAX_VALUE))
+                .addContainerGap(407, Short.MAX_VALUE))
         );
 
         pack();
@@ -448,32 +448,32 @@ public class FrmPrincipal extends javax.swing.JFrame implements ItfPrincipal{
     private void jMenuItem10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem10ActionPerformed
         // TODO add your handling code here:
 
-//        Workbook book = new XSSFWorkbook();
-//        Sheet sheet = book.createSheet("hoja1");
-//        FileOutputStream fileOut = null;
-//        try {
-//            //FileOutputStream fileOut = new FileOutputStream(new File("informeFumiPlus.xlsx"));
-//            fileOut = new FileOutputStream(new File(ruta));
-//        } catch (FileNotFoundException ex) {
-//            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//
-//        try {
-//            book.write(fileOut);
-//        } catch (IOException ex) {
-//            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//
-//        try {
-//            fileOut.close();
-//        } catch (IOException ex) {
-//            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        try {
-//            Runtime.getRuntime().exec("cmd /c start " + ruta + "\\Desktop\"\\nuevo.xlsx");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        Workbook book = new XSSFWorkbook();
+        Sheet sheet = book.createSheet("hoja1");
+        FileOutputStream fileOut = null;
+        try {
+            //FileOutputStream fileOut = new FileOutputStream(new File("informeFumiPlus.xlsx"));
+            fileOut = new FileOutputStream(new File(ruta));
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        try {
+            book.write(fileOut);
+        } catch (IOException ex) {
+            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        try {
+            fileOut.close();
+        } catch (IOException ex) {
+            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            Runtime.getRuntime().exec("cmd /c start " + ruta + "\\Desktop\"\\nuevo.xlsx");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }//GEN-LAST:event_jMenuItem10ActionPerformed
 
     private void jMenuItem9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem9ActionPerformed

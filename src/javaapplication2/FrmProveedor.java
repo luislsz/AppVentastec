@@ -24,18 +24,14 @@ public class FrmProveedor extends javax.swing.JFrame implements ItfFrmProveedor 
      */
     public FrmProveedor() {
         initComponents();
-        carga();
-
-    }
-
-    @Override
-    public void carga() {
         this.getContentPane().setBackground(Color.WHITE);
         jTextField1.setEditable(false);
         Buscarproveedor bt = new Buscarproveedor();
         bt.start();
+
     }
 
+    @Override
     public void setLdcfinal(List<DetalleCompra> ldcfinal) {
         this.ldcfinal = ldcfinal;
     }
@@ -286,7 +282,9 @@ public class FrmProveedor extends javax.swing.JFrame implements ItfFrmProveedor 
         FormCompras frt = new FormCompras();
         frt.setEnabled(true);
         frt.setVisible(true);
-        frt.setLdc(ldcfinal);
+        if (ldcfinal instanceof DetalleCompra) {
+            frt.setLdc(ldcfinal);
+        }
 
 
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -307,8 +305,8 @@ public class FrmProveedor extends javax.swing.JFrame implements ItfFrmProveedor 
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        Proveedor proveedor = new Proveedor();
-        if (Integer.parseInt(jTextField1.getText()) == 0) {
+        Proveedor proveedor = Proveedor.getInstance();
+        if (Integer.parseInt(jTextField1.getText()) == 0 && proveedor instanceof Proveedor) {
             proveedor.setIdproveedor(Integer.parseInt(jTextField1.getText()));
             proveedor.setNombreprov(jTextField2.getText());
             proveedor.setConcepto(jTextPane1.getText());
@@ -324,10 +322,9 @@ public class FrmProveedor extends javax.swing.JFrame implements ItfFrmProveedor 
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
-        Proveedor proveedor = new Proveedor();
-        if (Integer.parseInt(jTextField1.getText()) > 0) {
+        Proveedor proveedor = Proveedor.getInstance();
+        if (Integer.parseInt(jTextField1.getText()) > 0 && proveedor instanceof Proveedor) {
             proveedor.setIdproveedor(Integer.parseInt(jTextField1.getText()));
-
             proveedor.start();
             ClaseMensaje.miMensajeAprovado();
             jTextField1.setText("0");
@@ -364,16 +361,14 @@ public class FrmProveedor extends javax.swing.JFrame implements ItfFrmProveedor 
         this.setEnabled(false);
         this.setVisible(false);
     }//GEN-LAST:event_formWindowClosed
-
-    @Override
+      @Override
     public void evalnum(java.awt.event.KeyEvent ohynu) {
         char c = ohynu.getKeyChar();
         if ((c < '0' || c > '9')) {
             ohynu.consume();
         }
     }
-
-    @Override
+   @Override
     public void evaltextYnum(java.awt.event.KeyEvent tyea) {
         char c = tyea.getKeyChar();
         if ((c < '0' || c > '9') & (c < 'A' || c > 'Z') & (c < 'a' || c > 'z') & (c < '.' || c > '.') & (c < ' ' || c > ' ')) {
@@ -437,28 +432,22 @@ public class FrmProveedor extends javax.swing.JFrame implements ItfFrmProveedor 
     private javax.swing.JTextField jTextField3;
     private javax.swing.JTextPane jTextPane1;
     // End of variables declaration//GEN-END:variables
-
-    private interface ItfBuscarproveedor {
-
-        void run();
-    }
-
-    private class Buscarproveedor extends Thread implements ItfBuscarproveedor {
+private class Buscarproveedor extends Thread {
 
         @Override
         public void run() {
+            Basededatos bd = Basededatos.getInstance();
             try {
                 DefaultTableModel modelo = new DefaultTableModel();
-
                 modelo.addColumn("IdProveedor");
                 modelo.addColumn("Nombre");
                 modelo.addColumn("Concepto");
                 jTable1.setModel(modelo);
-                if (Basededatos.conectar() != null) {
+                if (bd.conectar() != null) {
 
                     String sql = "Select * from proveedor where nombre like '%" + jTextField3.getText() + "%'";
 
-                    Statement ps = Basededatos.conn.createStatement();
+                    Statement ps = bd.conn.createStatement();
                     ResultSet rs = ps.executeQuery(sql);
 
                     while (rs.next()) {
@@ -478,7 +467,7 @@ public class FrmProveedor extends javax.swing.JFrame implements ItfFrmProveedor 
                 Logger.getLogger(FrmProveedor.class.getName()).log(Level.SEVERE, null, e);
 
             } finally {
-                Basededatos.desconectar();
+                bd.desconectar();
             }
             try {
                 this.stop();

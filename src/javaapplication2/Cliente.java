@@ -11,86 +11,82 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
-public class Cliente extends Thread implements ItfCliente{
+public class Cliente extends Thread implements ItfCliente {
 
     private Integer idcliente = null;
     private String cedula = null, correo = null, nombres = null, apellidos = null, telefono = null;
     static final private String sqlinsert = "insert into cliente(idcliente, cedula, correo, nombres, apellidos,telefono) values(?,?,?,?,?,?)";
     static final private String sqlupdate = "update cliente set cedula=?, correo=?, nombres=?, apellidos=?,telefono=? where idcliente=?";
     static final private String sqldelete = "delete from cliente where idcliente=?";
+    public static Cliente instancia=null;
 
-    public Cliente() {
+    
+
+    public final static Cliente getInstance(){
+    if (instancia == null) {
+            instancia = new Cliente();
+        }
+        return instancia;
     }
-
     @Override
     public Integer getIdcliente() {
         return idcliente;
     }
-
-    @Override
+@Override
     public void setIdcliente(Integer idcliente) {
         this.idcliente = idcliente;
     }
-
-    @Override
+@Override
     public String getCedula() {
         return cedula;
     }
-
-    @Override
+@Override
     public void setCedula(String cedula) {
         this.cedula = cedula;
     }
-
-    @Override
+@Override
     public String getCorreo() {
         return correo;
     }
-
-    @Override
+@Override
     public void setCorreo(String correo) {
         this.correo = correo;
     }
-
-    @Override
+@Override
     public String getNombres() {
         return nombres;
     }
-
-    @Override
+@Override
     public void setNombres(String nombres) {
         this.nombres = nombres;
     }
-
-    @Override
+@Override
     public String getApellidos() {
         return apellidos;
     }
-
-    @Override
+@Override
     public void setApellidos(String apellidos) {
         this.apellidos = apellidos;
     }
-
-    @Override
+@Override
     public String getTelefono() {
         return telefono;
     }
-
-    @Override
+@Override
     public void setTelefono(String telefono) {
         this.telefono = telefono;
     }
 
     @Override
     public void run() {
+        Basededatos bd= Basededatos.getInstance();
         Md5 desencrip = new Md5();
         String cript = desencrip.getEncoddedString(cedula);
-        if (Basededatos.conectar() != null) {
+        if (bd.conectar() != null) {
             if (new ClaseEstado().estadoReg() == true && idcliente == 0) {
                 try {
 
-                    PreparedStatement ps = Basededatos.conn.
+                    PreparedStatement ps = bd.conn.
                             prepareStatement(sqlinsert);
 
                     ps.setInt(1, idcliente);
@@ -104,27 +100,27 @@ public class Cliente extends Thread implements ItfCliente{
                 } catch (SQLException ex) {
                     Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
-                    Basededatos.desconectar();
+                    bd.desconectar();
 
                 }
             } else if (new ClaseEstado().estadoElim() == true && (idcliente > 0 && null == correo && null == cedula)) {
                 if (0 == JOptionPane.showConfirmDialog(null, "confirmar")) {
                     try {
-                        PreparedStatement ps = Basededatos.conn.
+                        PreparedStatement ps = bd.conn.
                                 prepareStatement(sqldelete);
                         ps.setInt(1, idcliente);
                         ps.executeUpdate();
                     } catch (SQLException ex) {
                         Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
                     } finally {
-                        Basededatos.desconectar();
+                        bd.desconectar();
                         idcliente = 0;
                     }
 
                 }
             } else if (new ClaseEstado().estadoAct() == true && (idcliente > 0 && null != cedula && "" != cedula)) {
                 try {
-                    PreparedStatement ps = Basededatos.conn.
+                    PreparedStatement ps = bd.conn.
                             prepareStatement(sqlupdate);
 
                     ps.setString(1, cript);
@@ -138,7 +134,7 @@ public class Cliente extends Thread implements ItfCliente{
                 } catch (SQLException ex) {
                     Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
-                    Basededatos.desconectar();
+                    bd.desconectar();
 
                 }
             }
@@ -151,6 +147,4 @@ public class Cliente extends Thread implements ItfCliente{
         }
 
     }
-
-    
 }

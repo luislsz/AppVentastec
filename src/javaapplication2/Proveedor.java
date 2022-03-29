@@ -17,46 +17,49 @@ public class Proveedor extends Thread implements ItfProveedor{
     private String nombreprov = null, Concepto = null;
     static final private String sqlinsert = "insert into proveedor(nombre,concepto) values(?,?)";
     static final private String sqldelete = "delete from proveedor where idproveedor=?";
+    public static Proveedor instancia = null;
 
     public Proveedor() {
     }
 
-    @Override
+    public final static Proveedor getInstance() {
+        if (instancia == null) {
+            instancia = new Proveedor();
+        }
+        return instancia;
+    }
+@Override
     public Integer getIdproveedor() {
         return idproveedor;
     }
-
-    @Override
+@Override
     public void setIdproveedor(Integer idproveedor) {
         this.idproveedor = idproveedor;
     }
-
-    @Override
+@Override
     public String getNombreprov() {
         return nombreprov;
     }
-
-    @Override
+@Override
     public void setNombreprov(String nombreprov) {
         this.nombreprov = nombreprov;
     }
-
-    @Override
+@Override
     public String getConcepto() {
         return Concepto;
     }
-
-    @Override
+@Override
     public void setConcepto(String Concepto) {
         this.Concepto = Concepto;
     }
 
     @Override
     public void run() {
-        if (Basededatos.conectar() != null) {
+         Basededatos bd= Basededatos.getInstance();
+        if (bd.conectar() != null) {
             if (new ClaseEstado().estadoReg() == true && idproveedor == 0) {
                 try {
-                    PreparedStatement ps = Basededatos.conn.
+                    PreparedStatement ps = bd.conn.
                             prepareStatement(sqlinsert);
 
                     ps.setString(1, nombreprov);
@@ -66,20 +69,20 @@ public class Proveedor extends Thread implements ItfProveedor{
                 } catch (SQLException ex) {
                     Logger.getLogger(Proveedor.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
-                    Basededatos.desconectar();
+                    bd.desconectar();
 
                 }
             } else if (new ClaseEstado().estadoElim() == true && idproveedor > 0) {
                 if (0 == JOptionPane.showConfirmDialog(null, "confirmar")) {
                     try {
-                        PreparedStatement ps = Basededatos.conn.
+                        PreparedStatement ps = bd.conn.
                                 prepareStatement(sqldelete);
                         ps.setInt(1, idproveedor);
                         ps.executeUpdate();
                     } catch (SQLException ex) {
                         Logger.getLogger(Proveedor.class.getName()).log(Level.SEVERE, null, ex);
                     } finally {
-                        Basededatos.desconectar();
+                        bd.desconectar();
                         idproveedor = 0;
                     }
 

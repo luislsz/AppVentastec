@@ -5,20 +5,17 @@
  */
 package javaapplication2;
 
-public final class ClaseEstado {
+public class ClaseEstado {
 
-    public final static boolean estadoReg() {
-       
-        return  true;
-    }
-
-    public final static boolean estadoElim() {
-       
+    public static final boolean estadoReg() {
         return true;
     }
 
-    public final static boolean estadoAct() {
-        ;
+    public static final boolean estadoElim() {
+        return true;
+    }
+
+    public static final boolean estadoAct() {
         return true;
     }
 }

@@ -10,7 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Md5 implements ItfMd{
+public class Md5 implements ItfMd {
 
     @Override
     public String getEncoddedString(String texto) {
@@ -18,14 +18,14 @@ public class Md5 implements ItfMd{
             MessageDigest digest = MessageDigest.getInstance("MD5");
             digest.update(texto.getBytes());
             byte[] hash = digest.digest();
-            String encodded = toHexadecimal(hash);        
+            String encodded = toHexadecimal(hash);
             return encodded;
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(Md5.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
-//private como predeterminado
+
     @Override
     public String toHexadecimal(byte[] datos) {
         String resultado = "";
@@ -48,8 +48,8 @@ public class Md5 implements ItfMd{
         }
         if (ult0)//quitamos el 0 si es un caracter aislado
         {
-            resultado =
-                    resultado.substring(0, resultado.length() - 2) + resultado.charAt(resultado.length() - 1);
+            resultado
+                    = resultado.substring(0, resultado.length() - 2) + resultado.charAt(resultado.length() - 1);
         }
         return resultado;
     }

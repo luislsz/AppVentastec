@@ -11,15 +11,16 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class Basededatos {
+public class Basededatos {
 
     protected static Connection conn;
     private static final String ruta = "jdbc:mysql://localhost:3306/dbventastec";
     private static final String root = "root";
     private static final String passw = "";
+    private static Basededatos instancia = null;
 
-    protected static final Connection conectar() {
-        boolean res = false;
+    static final Connection conectar() {
+        
         try {
             Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection(
@@ -33,7 +34,14 @@ public final class Basededatos {
         return conn;
     }
 
-    protected static final void desconectar() {
+    public final static Basededatos getInstance() {
+        if (instancia == null) {
+            instancia = new Basededatos();
+        }
+        return instancia;
+    }
+
+    static final void desconectar() {
         try {
             if (conn != null && !conn.isClosed()) {
                 conn.close();

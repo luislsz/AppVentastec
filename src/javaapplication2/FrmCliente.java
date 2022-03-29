@@ -16,14 +16,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 
-public class FrmCliente extends javax.swing.JFrame implements ItfFrmCliente {
+public class FrmCliente extends javax.swing.JFrame implements ItfFrmCliente{
 
+    /**
+     * Creates new form FrmCliente
+     */
     public FrmCliente() {
         initComponents();
-    }
-
-    @Override
-    public void carga() {
         this.getContentPane().setBackground(Color.WHITE);
         txtidcliente.setEditable(false);
     }
@@ -264,8 +263,8 @@ public class FrmCliente extends javax.swing.JFrame implements ItfFrmCliente {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        Cliente cl = new Cliente();
-        if (Integer.parseInt(txtidcliente.getText()) == 0) {
+        Cliente cl = Cliente.getInstance();
+        if (Integer.parseInt(txtidcliente.getText()) == 0 && cl instanceof Cliente) {
             cl.setIdcliente(Integer.parseInt(txtidcliente.getText()));
             cl.setCedula(txtcedula.getText());
             cl.setCorreo(txtcorreo.getText());
@@ -288,8 +287,8 @@ public class FrmCliente extends javax.swing.JFrame implements ItfFrmCliente {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        Cliente cl = new Cliente();
-        if (Integer.parseInt(txtidcliente.getText()) > 0) {
+       Cliente cl = Cliente.getInstance();
+        if (Integer.parseInt(txtidcliente.getText()) > 0 && cl instanceof Cliente) {
             cl.setIdcliente(Integer.parseInt(txtidcliente.getText()));
             cl.start();
             ClaseMensaje.miMensajeEliminado();
@@ -306,8 +305,8 @@ public class FrmCliente extends javax.swing.JFrame implements ItfFrmCliente {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
-        Cliente cl = new Cliente();
-        if (Integer.parseInt(txtidcliente.getText()) > 0) {
+       Cliente cl = Cliente.getInstance();
+        if (Integer.parseInt(txtidcliente.getText()) > 0 && cl instanceof Cliente) {
             cl.setIdcliente(Integer.parseInt(txtidcliente.getText()));
             cl.setCedula(txtcedula.getText());
             cl.setCorreo(txtcorreo.getText());
@@ -392,8 +391,7 @@ public class FrmCliente extends javax.swing.JFrame implements ItfFrmCliente {
         this.setEnabled(false);
         this.setVisible(false);
     }//GEN-LAST:event_formWindowClosed
-
-    @Override
+       @Override
     public boolean isEmail(String correo) {
         Pattern pat = null;
         Matcher mat = null;
@@ -405,16 +403,15 @@ public class FrmCliente extends javax.swing.JFrame implements ItfFrmCliente {
             return false;
         }
     }
-
-    @Override
+    
+   @Override
     public void evalnum(java.awt.event.KeyEvent tyea) {
         char c = tyea.getKeyChar();
         if ((c < '0' || c > '9')) {
             tyea.consume();
         }
     }
-
-    @Override
+   @Override
     public void evaltext(java.awt.event.KeyEvent tyea) {
         char c = tyea.getKeyChar();
         if ((c < 'A' || c > 'Z') & (c < 'a' || c > 'z') & (c < ' ' || c > ' ')) {
@@ -477,30 +474,27 @@ public class FrmCliente extends javax.swing.JFrame implements ItfFrmCliente {
     private javax.swing.JTextField txtnombres;
     private javax.swing.JTextField txttelefono;
     // End of variables declaration//GEN-END:variables
-private interface ItfBuscarCliente {
-        void run();
-    }
-
-    private class BuscarCliente extends Thread implements ItfBuscarCliente {
+private class BuscarCliente extends Thread {
 
         @Override
         public void run() {
-            Md5 desencrip = new Md5();
-            String cript = desencrip.getEncoddedString(txtcedula.getText());
-            if (Basededatos.conectar() != null) {
+             Basededatos bd= Basededatos.getInstance();
+                Md5 desencrip = new Md5();
+                String cript = desencrip.getEncoddedString(txtcedula.getText());
+            if (bd.conectar() != null) {
                 String sql = "Select * from cliente where cedula ='" + cript + "'";
 
                 try {
-                    Statement ps = Basededatos.conn.createStatement();
+                    Statement ps = bd.conn.createStatement();
                     ResultSet rs = ps.executeQuery(sql);
-                    if (rs.next()) {
-                        txtidcliente.setText(String.valueOf(rs.getInt("idcliente")));
+                    if (rs.next()) {                   
+                        txtidcliente.setText(String.valueOf(rs.getInt("idcliente")));                        
                         txtcorreo.setText(rs.getString("correo"));
                         txtnombres.setText(rs.getString("nombres"));
                         txtapellidos.setText(rs.getString("apellidos"));
                         txttelefono.setText(rs.getString("telefono"));
-                    } else {
-                        ClaseMensaje.miMensajeNoEncontrado();
+                    }else{
+                      ClaseMensaje.miMensajeNoEncontrado();
                     }
                 } catch (SQLException ex) {
                     Logger.getLogger(FrmCliente.class.getName()).log(Level.SEVERE, null, ex);

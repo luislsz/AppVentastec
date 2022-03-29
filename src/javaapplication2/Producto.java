@@ -17,143 +17,126 @@ public class Producto extends Thread implements ItfProducto{
     private Integer idProducto = null;
     private String nombre = null, descripcion = null, marca = null, modelo = null, tipo = null, gama = null, procesador = null, memoriaInterna = null, memoriaExterna = null;
     private Double valor = null;
-   
-    private static final String sqlinsert = "insert into producto(nombre, descripcion, stock, valor, marca, modelo, tipo, gama, procesador, memoriaInterna, memoriaExterna) values(?,?,?,?,?,?,?,?,?,?,?)";
-    private static final String sqlupdate = "update producto set nombre=?, descripcion=?, stock=?, valor=?, marca=?, modelo=?, tipo=?, gama=?, procesador=?, memoriaInterna=?, memoriaExterna=? where idproducto=?";
-    private static final String sqldelete = "delete from producto where idproducto=?";
+    static final private String sqlinsert = "insert into producto(nombre, descripcion, stock, valor, marca, modelo, tipo, gama, procesador, memoriaInterna, memoriaExterna) values(?,?,?,?,?,?,?,?,?,?,?)";
+    static final private String sqlupdate = "update producto set nombre=?, descripcion=?, stock=?, valor=?, marca=?, modelo=?, tipo=?, gama=?, procesador=?, memoriaInterna=?, memoriaExterna=? where idproducto=?";
+    static final private String sqldelete = "delete from producto where idproducto=?";
+    public static Producto instancia = null;
 
     public Producto() {
     }
 
-    @Override
+    public final static Producto getInstance() {
+        if (instancia == null) {
+            instancia = new Producto();
+        }
+        return instancia;
+    }
+@Override
     public Integer getStock() {
         return stock;
     }
-
-    @Override
+@Override
     public void setStock(Integer stock) {
         this.stock = stock;
     }
-
-    @Override
+@Override
     public Integer getIdProducto() {
         return idProducto;
     }
-
-    @Override
+@Override
     public void setIdProducto(Integer idProducto) {
         this.idProducto = idProducto;
     }
-
     @Override
     public String getNombre() {
         return nombre;
     }
-
-    @Override
+@Override
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
-
-    @Override
+@Override
     public String getDescripcion() {
         return descripcion;
     }
-
-    @Override
+@Override
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
-
-    @Override
+@Override
     public String getMarca() {
         return marca;
     }
-
-    @Override
+@Override
     public void setMarca(String marca) {
         this.marca = marca;
     }
-
-    @Override
+@Override
     public String getModelo() {
         return modelo;
     }
-
-    @Override
+@Override
     public void setModelo(String modelo) {
         this.modelo = modelo;
     }
-
-    @Override
+@Override
     public String getTipo() {
         return tipo;
     }
-
-    @Override
+@Override
     public void setTipo(String tipo) {
         this.tipo = tipo;
     }
-
-    @Override
+@Override
     public String getGama() {
         return gama;
     }
-
-    @Override
+@Override
     public void setGama(String gama) {
         this.gama = gama;
     }
-
-    @Override
+@Override
     public String getProcesador() {
         return procesador;
     }
-
-    @Override
+@Override
     public void setProcesador(String procesador) {
         this.procesador = procesador;
     }
-
-    @Override
+@Override
     public String getMemoriaInterna() {
         return memoriaInterna;
     }
-
-    @Override
+@Override
     public void setMemoriaInterna(String memoriaInterna) {
         this.memoriaInterna = memoriaInterna;
     }
-
-    @Override
+@Override
     public String getMemoriaExterna() {
         return memoriaExterna;
     }
-
-    @Override
+@Override
     public void setMemoriaExterna(String memoriaExterna) {
         this.memoriaExterna = memoriaExterna;
     }
-
-    @Override
+@Override
     public Double getValor() {
         return valor;
     }
-
-    @Override
+@Override
     public void setValor(Double valor) {
         this.valor = valor;
     }
 
     @Override
     public void run() {
-
-        if (Basededatos.conectar() != null) {
+    Basededatos bd= Basededatos.getInstance();
+        if (bd.conectar() != null) {
 
             if (new ClaseEstado().estadoReg() == true && idProducto == 0) {
                 try {
 
-                    PreparedStatement ps = Basededatos.conn.
+                    PreparedStatement ps = bd.conn.
                             prepareStatement(sqlinsert);
 
                     ps.setString(1, nombre);
@@ -172,27 +155,27 @@ public class Producto extends Thread implements ItfProducto{
                 } catch (SQLException ex) {
                     Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
-                    Basededatos.desconectar();
+                    bd.desconectar();
                     nombre = null;
                 }
             } else if (new ClaseEstado().estadoElim() == true && idProducto > 0) {
                 if (0 == JOptionPane.showConfirmDialog(null, "confirmar")) {
                     try {
-                        PreparedStatement ps = Basededatos.conn.
+                        PreparedStatement ps = bd.conn.
                                 prepareStatement(sqldelete);
                         ps.setInt(1, idProducto);
                         ps.executeUpdate();
                     } catch (SQLException ex) {
                         Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
                     } finally {
-                        Basededatos.desconectar();
+                        bd.desconectar();
                         idProducto = 0;
                     }
 
                 }
             } else if (new ClaseEstado().estadoAct() == true && null != nombre && (idProducto > 0 && !"".equals(nombre))) {
                 try {
-                    PreparedStatement ps = Basededatos.conn.
+                    PreparedStatement ps = bd.conn.
                             prepareStatement(sqlupdate);
                     ps.setString(1, nombre);
                     ps.setString(2, descripcion);
@@ -211,7 +194,7 @@ public class Producto extends Thread implements ItfProducto{
                 } catch (SQLException vc) {
                     Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, vc);
                 } finally {
-                    Basededatos.desconectar();
+                    bd.desconectar();
                     nombre = null;
                 }
             }

@@ -28,8 +28,9 @@ import javax.swing.JOptionPane;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
-public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVentas {
+public class FrmVentas extends javax.swing.JFrame implements Printable,ItfFrmVentas {
 
+    private Basededatos bd = Basededatos.getInstance();
     private static List<DetalleVenta> ldv = new LinkedList<>();
     private String codigoFactura = "";
     private static final String mostarprodsql = "Select nombre from producto";
@@ -40,8 +41,8 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
     private static final String mensaje2 = "limite de inventario excedido";
     private static final String mensaje3 = "unidades de producto en minimo revise el stock";
 
-    @Override
-    public void setLdv(List<DetalleVenta> ldv) {
+       @Override
+    public  void setLdv(List<DetalleVenta> ldv) {
         FrmVentas.ldv = ldv;
     }
 
@@ -50,13 +51,9 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
      */
     public FrmVentas() {
         initComponents();
-        carga();
-    }
-
-    @Override
-    public void carga() {
         this.getContentPane().setBackground(Color.WHITE);
         AutoCompleteDecorator.decorate(cmbidproducto);
+
         String verdadero = preferences.get("cproducto2", "");
         lblcliente.setText(verdadero);
         listprod hy = new listprod();
@@ -70,11 +67,12 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
 
         @Override
         public void run() {
+
             try {
-                if (Basededatos.conectar() != null) {
+                if (bd.conectar() != null) {
                     try {
 
-                        Statement ps = Basededatos.conn.createStatement();
+                        Statement ps = bd.conn.createStatement();
                         ResultSet rs = ps.executeQuery(mostarprodsql);
                         while (rs.next()) {
                             cmbidproducto.addItem(rs.getString("nombre"));
@@ -84,7 +82,7 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
                     } catch (SQLException ew) {
                         System.out.println(ew);
                     } finally {
-                        Basededatos.desconectar();
+                        bd.desconectar();
                     }
                 }
                 try {
@@ -388,11 +386,10 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
         String sqlnom = "Select idproducto,stock from Producto where nombre ='" + nombreprod + "'";
         String sqlidproducto = "Select valor from Producto where  idproducto=";
         int cant = Integer.parseInt(txtcantidad.getText());
-
-        if (Basededatos.conectar()
-                != null) {
+        Basededatos bd = Basededatos.getInstance();
+        if (bd.conectar()!= null) {
             try {
-                Statement ps = Basededatos.conn.createStatement();
+                Statement ps = bd.conn.createStatement();
                 ResultSet rs = ps.executeQuery(sqlnom);
 
                 while (rs.next()) {
@@ -402,7 +399,7 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
                 try {
                     String sql2 = sqlidproducto + idproducto;
 
-                    Statement ps2 = Basededatos.conn.createStatement();
+                    Statement ps2 = bd.conn.createStatement();
                     ResultSet rs2 = ps.executeQuery(sql2);
 
                     while (rs2.next()) {
@@ -410,17 +407,16 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
                         valorunitario = rs2.getDouble("valor");
                     }
 
-                    Basededatos.desconectar();
                     //la lista
                 } catch (SQLException ex) {
                     Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                Basededatos.desconectar();
+
                 //la lista
             } catch (SQLException ex) {
                 Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
-                Basededatos.desconectar();
+                bd.desconectar();
             }
         }
         codigoFactura = txtcodigofactura.getText();
@@ -440,6 +436,8 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
                     nombreprod,
                     cant,
                     subtotal};
+//                modelo.addRow(dato1);
+//                jTable1.setModel(modelo);
                 jTextPane2.setText(jTextPane2.getText() + nombreprod
                         + "/" + cant
                         + "/" + subtotal + "\n");
@@ -447,7 +445,9 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
                 lbltotal.setText(String.valueOf(total));
                 //////////////////////////////////////////////////////////
                 DetalleVenta dc = new DetalleVenta(cant, subtotal, idproducto, nombreprod, codigoFactura);
+                if(ldv instanceof DetalleVenta){
                 ldv.add(dc);
+                }
                 /////////////////////////////////////////////////////////////
             } else {
 
@@ -459,11 +459,15 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
                 jTextPane2.setText(jTextPane2.getText() + nombreprod
                         + "/" + cant
                         + "/" + subtotal + "\n");
+//                modelo.addRow(dato1);
+//                jTable1.setModel(modelo);
                 total = Double.parseDouble(lbltotal.getText()) + subtotal;
                 lbltotal.setText(String.valueOf(total));
                 //////////////////////////////////////////////////////////
                 DetalleVenta dc = new DetalleVenta(cant, subtotal, idproducto, nombreprod, codigoFactura);
-                ldv.add(dc);
+                if (dc instanceof DetalleVenta) {
+                    ldv.add(dc);
+                }
                 /////////////////////////////////////////////////////////////
             }
         }
@@ -509,6 +513,7 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
         // TODO add your handling code here:
         String fs = null;
         double total = 0.0;
+           if (ldv instanceof DetalleCompra) {
         for (DetalleVenta c : ldv) {
             jTextPane2.setText(jTextPane2.getText() + c.getNombreproducto()
                     + "/" + c.getCantidadDetalle()
@@ -529,23 +534,21 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
         this.setEnabled(false);
         this.setVisible(false);
     }//GEN-LAST:event_formWindowClosed
-    @Override
+       @Override
     public void evalnum(java.awt.event.KeyEvent tyea) {
         char c = tyea.getKeyChar();
         if ((c < '0' || c > '9')) {
             tyea.consume();
         }
     }
-
-    @Override
+   @Override
     public void evaltextYnum(java.awt.event.KeyEvent tyea) {
         char c = tyea.getKeyChar();
         if ((c < '0' || c > '9') & (c < 'A' || c > 'Z') & (c < 'a' || c > 'z') & (c < '.' || c > '.') & (c < ' ' || c > ' ')) {
             tyea.consume();
         }
     }
-
-    @Override
+   @Override
     public void evalnumdec(java.awt.event.KeyEvent ohynu) {
         char c = ohynu.getKeyChar();
         if ((c < '0' || c > '9') & (c < '.' || c > '.')) {
@@ -613,7 +616,7 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
     private javax.swing.JTextField txtconsignacioncliente;
     // End of variables declaration//GEN-END:variables
 
-    private static final PDPage page = new PDPage();
+    //private static final PDPage page = new PDPage();
 
     @Override
     public int print(Graphics graf, PageFormat pagefor, int Index) throws PrinterException {
@@ -628,12 +631,7 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
 
     }
 
-    private interface ItfAddVenta {
-
-        void run();
-    }
-
-    private class AddVenta extends Thread implements ItfAddVenta {
+    private class AddVenta extends Thread {
 
         private static final String sqlupdateproducto = "update producto set  stock=stock-? where idproducto=?";
         private static final String sqlinsetvdetalleventas = "insert into detalleVenta(cantidadDetalle,subtotal,producto_idproducto,ventas_codigoVentas) values(?,?,?,?)";
@@ -641,15 +639,15 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
 
         @Override
         public void run() {
-            String alojf = preferences.get("cproducto2", "");
+            String lgf = preferences.get("cproducto2", "");
             Md5 desencrip = new Md5();
-            String cript = desencrip.getEncoddedString(alojf);
+            String cript = desencrip.getEncoddedString(lgf);
             int idcliente = 0;
-            if (Basededatos.conectar() != null) {
+            if (bd.conectar() != null) {
                 try {
                     String sql = "Select idcliente from cliente where cedula ='" + cript + "'";
 
-                    Statement ps = Basededatos.conn.createStatement();
+                    Statement ps = bd.conn.createStatement();
                     ResultSet rs = ps.executeQuery(sql);
 
                     while (rs.next()) {
@@ -659,11 +657,16 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
                 } catch (SQLException ex) {
                     Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
-                    Basededatos.desconectar();
+                    bd.desconectar();
                 }
             }
             double consignacion = Double.parseDouble(txtconsignacioncliente.getText());
 
+//            int ldcfil = ldc.size() + 7;
+//            String[][] content1 = new String[ldcfil][3];
+//            content1[0][0] = "Nombre";
+//            content1[0][1] = "Cantidad";
+//            content1[0][2] = "Subtotal";
             java.util.Date utilDate = new java.util.Date();
             Date sqlDate = new Date(utilDate.getTime());
             /////////////////////////////////////////////////////////////
@@ -676,13 +679,13 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
                     + "\nDevolucion:" + String.valueOf(consignacion - total)
                     + "\nCodigoFactura:" + codigoFactura
                     + "\nFechaVenta:" + sqlDate.toString()
-                    + "\nCliente:" + alojf);
-            if (Basededatos.conectar() != null) {
+                    + "\nCliente:" + lgf);
+            if (bd.conectar() != null) {
                 if (new ClaseEstado().estadoReg() == true && !"".equals(codigoFactura)) {
 
                     try {
 
-                        PreparedStatement ps = Basededatos.conn.
+                        PreparedStatement ps = bd.conn.
                                 prepareStatement(sqlinsertventas);
 
                         ps.setString(1, codigoFactura);
@@ -697,13 +700,14 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
                         Logger.getLogger(Producto.class
                                 .getName()).log(Level.SEVERE, null, ex);
                     } finally {
-                        Basededatos.desconectar();
+                        bd.desconectar();
 
                     }
 
                 }
             }
-            if (Basededatos.conectar() != null) {
+            //////////////////////////////////////////////
+            if (bd.conectar() != null) {
 
                 if (new ClaseEstado().estadoReg() == true && !"".equals(codigoFactura)) {
 
@@ -711,7 +715,7 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
                         int i = 1;
                         for (DetalleVenta c : ldv) {
 
-                            PreparedStatement ps = Basededatos.conn.
+                            PreparedStatement ps = bd.conn.
                                     prepareStatement(sqlinsetvdetalleventas);
 
                             ps.setInt(1, c.getCantidadDetalle());
@@ -720,23 +724,77 @@ public class FrmVentas extends javax.swing.JFrame implements Printable, ItfFrmVe
                             ps.setString(4, c.getVentas_codigoVentas());
 
                             ps.executeUpdate();
-                            PreparedStatement ps2 = Basededatos.conn.
+//                            content1[i][0] = "" + c.getNombreproducto();
+//                            content1[i][1] = "" + c.getCantidadDetalle();
+//                            content1[i][2] = "" + c.getSubtotal();
+                            PreparedStatement ps2 = bd.conn.
                                     prepareStatement(sqlupdateproducto);
                             ps2.setInt(1, c.getCantidadDetalle());
                             ps2.setInt(2, c.getProducto_idproducto());
                             ps2.executeUpdate();
+//                        Object[] dato1 = new Object[]{
+//                            c.getCantidadDetalle(),
+//                            c.getSubtotal(),
+//                            c.getProducto_idproducto()};
+//                        contenido.showTextWithPositioning(dato1);
+                            //contenido.showText("cantidad:" + c.getCantidadDetalle() + " subtotal:" + c.getSubtotal() + " idproducto:" + c.getProducto_idproducto());
                             i++;
                         }
+//                        content1[i][0] = "";
+//                        content1[i][1] = "TotalVenta";
+//                        content1[i][2] = String.valueOf(total);
+//                        
+//                        content1[i + 1][0] = "";
+//                        content1[i + 1][1] = "Consignacion";
+//                        content1[i + 1][2] = String.valueOf(consignacion);
+//                        
+//                        content1[i + 2][0] = "";
+//                        content1[i + 2][1] = "Devolucion";
+//                        content1[i + 2][2] = String.valueOf(consignacion - total);
+//                        
+//                        content1[i + 3][0] = "";
+//                        content1[i + 3][1] = "CodigoFactura";
+//                        content1[i + 3][2] = codigoFactura;
+//                        
+//                        content1[i + 4][0] = "";
+//                        content1[i + 4][1] = "FechaVenta";
+//                        content1[i + 4][2] = sqlDate.toString();
+//                        
+//                        content1[i + 5][0] = "";
+//                        content1[i + 5][1] = "Cliente";
+//                        content1[i + 5][2] = verdadero;
 
-                    } catch (SQLException ex) {
+                    } //                catch (IOException ex) {
+                    //                    Logger.getLogger(FrmVentas.class.getName()).log(Level.SEVERE, null, ex);
+                    //                }
+                    catch (SQLException ex) {
                         Logger.getLogger(Producto.class
                                 .getName()).log(Level.SEVERE, null, ex);
                     }
+//                finally {
+//                    Basededatos.desconectar();
+//                   ClaseMensaje.miMensajeAprovado();
+//                }
 
                 }
 
             }
 
+//            PDDocument doc = new PDDocument();
+//            try {
+//                
+//                doc.addPage(page);
+//                
+//                try (PDPageContentStream contentStream = new PDPageContentStream(doc, page)) {
+//                    
+//                    drawTable(contentStream, 700.0f, 100.0f, content1);
+//                }
+//                String ruta = System.getProperty("user.home");
+//                doc.save(ruta + "/Desktop/venta.pdf");
+//            } catch (IOException ex) {
+//                Logger.getLogger(FrmVentas.class
+//                        .getName()).log(Level.SEVERE, null, ex);
+//            }
             try {
                 this.stop();
 

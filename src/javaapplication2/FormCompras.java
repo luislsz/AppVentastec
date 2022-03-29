@@ -6,7 +6,6 @@
 package javaapplication2;
 
 import java.awt.Color;
-import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,6 +28,7 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
 
+    private Basededatos bd = Basededatos.getInstance();
     private static List<DetalleCompra> ldc = new LinkedList<>();
     private final DefaultTableModel modelo = new DefaultTableModel();
     private double total = 0.0;
@@ -36,7 +36,7 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
     private static final String mostarprodsql = "Select nombre from producto";
     private static final String mostarproveesql = "Select nombre from proveedor";
     private static final String mensaje = "error en el envio o procesamiento de los parametros";
-
+    
     @Override
     public void setLdc(List<DetalleCompra> ldc) {
         FormCompras.ldc = ldc;
@@ -47,12 +47,7 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
      */
     public FormCompras() {
         initComponents();
-        carga();
-    }
-    
-    @Override
-    public void carga(){
-    this.getContentPane().setBackground(Color.WHITE);
+        this.getContentPane().setBackground(Color.WHITE);
         listprod hy = new listprod();
         hy.start();
 
@@ -67,7 +62,8 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
         AutoCompleteDecorator.decorate(jComboBox1);
         AutoCompleteDecorator.decorate(jComboBox2);
     }
-    private class  listprod extends Thread {
+
+    private class listprod extends Thread {
 
         public listprod() {
         }
@@ -75,10 +71,10 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
         @Override
         public void run() {
             try {
-                if (Basededatos.conectar() != null) {
+                if (bd.conectar() != null) {
                     try {
 
-                        Statement ps = Basededatos.conn.createStatement();
+                        Statement ps = bd.conn.createStatement();
                         ResultSet rs = ps.executeQuery(mostarprodsql);
                         while (rs.next()) {
                             jComboBox1.addItem(rs.getString("nombre"));
@@ -88,7 +84,7 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
                     } catch (SQLException ew) {
                         System.out.println(ew);
                     } finally {
-                        Basededatos.desconectar();
+                        bd.desconectar();
                     }
                 }
                 try {
@@ -112,10 +108,10 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
         @Override
         public void run() {
             try {
-                if (Basededatos.conectar() != null) {
+                if (bd.conectar() != null) {
                     try {
 
-                        Statement ps = Basededatos.conn.createStatement();
+                        Statement ps = bd.conn.createStatement();
                         ResultSet rs = ps.executeQuery(mostarproveesql);
                         while (rs.next()) {
                             jComboBox2.addItem(rs.getString("nombre"));
@@ -126,7 +122,7 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
                     } catch (SQLException eq) {
                         System.out.println(eq);
                     } finally {
-                        Basededatos.desconectar();
+                        bd.desconectar();
                     }
                 }
                 try {
@@ -351,10 +347,10 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jLabel4)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButton3)))
-                        .addGap(0, 43, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jLabel7)
@@ -413,11 +409,11 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
         int idproducto = 0;
         int idproveedor = 0;
 
-        if (Basededatos.conectar() != null) {
+        if (bd.conectar() != null) {
             try {
                 String sql = "Select idproducto from Producto where nombre ='" + nombreprod + "'";
 
-                Statement ps = Basededatos.conn.createStatement();
+                Statement ps = bd.conn.createStatement();
                 ResultSet rs = ps.executeQuery(sql);
 
                 while (rs.next()) {
@@ -427,14 +423,14 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
             } catch (SQLException ex) {
                 System.out.println(ex);
             } finally {
-                Basededatos.desconectar();
+                bd.desconectar();
             }
         }
-        if (Basededatos.conectar() != null) {
+        if (bd.conectar() != null) {
             try {
                 String sqlprovee = "Select idproveedor from proveedor where nombre ='" + proveed + "'";
 
-                Statement psprovee = Basededatos.conn.createStatement();
+                Statement psprovee = bd.conn.createStatement();
                 ResultSet rsprovee = psprovee.executeQuery(sqlprovee);
 
                 while (rsprovee.next()) {
@@ -445,7 +441,7 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
             } catch (SQLException ex) {
                 System.out.println(ex);
             } finally {
-                Basededatos.desconectar();
+                bd.desconectar();
             }
         }
         if (idproducto > 0 && idproveedor > 0 && !"".equals(codigoFactura) && nombreprod != "") {
@@ -464,7 +460,9 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
             lbltotal.setText(String.valueOf(total));
             //////////////////////////////////////////////////////////
             dc = new DetalleCompra(cant, subtotal, idproducto, nombreprod, codigoFactura, idproveedor, proveed);
-            ldc.add(dc);
+            if (dc instanceof DetalleCompra) {
+                ldc.add(dc);
+            }
 
             /////////////////////////////////////////////////////////////
         } else {
@@ -476,16 +474,17 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
         // TODO add your handling code here:
         total = 0.0;
         String fat = null;
-
-        for (DetalleCompra c : ldc) {
-            Object[] dato1 = new Object[]{
-                c.getNombreproduc(),
-                c.getCantidadDetalle(),
-                c.getSubtotal(),
-                c.getNombreprovee()};
-            modelo.addRow(dato1);
-            total = total + c.getSubtotal();
-            fat = c.getCompra_codigoCompra();
+        if (ldc instanceof DetalleCompra) {
+            for (DetalleCompra c : ldc) {
+                Object[] dato1 = new Object[]{
+                    c.getNombreproduc(),
+                    c.getCantidadDetalle(),
+                    c.getSubtotal(),
+                    c.getNombreprovee()};
+                modelo.addRow(dato1);
+                total = total + c.getSubtotal();
+                fat = c.getCompra_codigoCompra();
+            }
         }
         codigoFactura = fat;
         jTextField3.setText(fat);
@@ -500,8 +499,9 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
         FrmInventario frt = new FrmInventario();
         frt.setEnabled(true);
         frt.setVisible(true);
+           if (ldc instanceof DetalleCompra) {
         frt.setLdcfinal(ldc);
-
+           }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
@@ -517,8 +517,9 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
         FrmProveedor frt = new FrmProveedor();
         frt.setEnabled(true);
         frt.setVisible(true);
+           if (ldc instanceof DetalleCompra) {
         frt.setLdcfinal(ldc);
-
+           }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jTextField1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField1KeyTyped
@@ -559,24 +560,21 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
         this.setEnabled(false);
         this.setVisible(false);
     }//GEN-LAST:event_formWindowClosed
-
-    @Override
+   @Override
     public void evaltextYnum(java.awt.event.KeyEvent tyea) {
         char c = tyea.getKeyChar();
         if ((c < '0' || c > '9') & (c < 'A' || c > 'Z') & (c < 'a' || c > 'z') & (c < '.' || c > '.') & (c < ' ' || c > ' ')) {
             tyea.consume();
         }
     }
-
-    @Override
+   @Override
     public void evalnum(java.awt.event.KeyEvent ohynu) {
         char c = ohynu.getKeyChar();
         if ((c < '0' || c > '9')) {
             ohynu.consume();
         }
     }
-
-    @Override
+   @Override
     public void evalnumdec(java.awt.event.KeyEvent ohynu) {
         char c = ohynu.getKeyChar();
         if ((c < '0' || c > '9') & (c < '.' || c > '.')) {
@@ -642,19 +640,22 @@ public class FormCompras extends javax.swing.JFrame implements ItfFrmCompras{
     private javax.swing.JTextField jTextField3;
     private javax.swing.JLabel lbltotal;
     // End of variables declaration//GEN-END:variables
-private interface ItfRegistroCompra  {
-     void run();
-}
-    private final class RegistroCompra extends Thread implements ItfRegistroCompra{
+
+    private class RegistroCompra extends Thread {
 
         private static final String sqlinsertcompra = "insert into compra(codigoCompra,total,fechaCompra) values(?,?,?)";
         private static final String sqldetallecompra = "insert into detalleCompra(cantidadDetalle,subtotal,producto_idproducto,compra_codigoCompra,proveedor_idproveedor) values(?,?,?,?,?)";
         private static final String sqlupdateproducto = "update producto set  stock=?+stock where idproducto=?";
 
+        public RegistroCompra() {
+        }
+
         @Override
         public void run() {
+
             try {
                 if (ldc.size() > 0) {
+                    if(ldc instanceof DetalleCompra){
                     int ldcfil = ldc.size() + 4;
                     String[][] content1 = new String[ldcfil][4];
                     content1[0][0] = "Nombre";
@@ -663,12 +664,12 @@ private interface ItfRegistroCompra  {
                     content1[0][3] = "Proveedor";
                     java.util.Date utilDate = new java.util.Date();
                     Date sqlDate = new Date(utilDate.getTime());
-                    if (Basededatos.conectar() != null) {
+                    if (bd.conectar() != null) {
                         if (new ClaseEstado().estadoReg() == true && !"".equals(codigoFactura)) {
 
                             try {
 
-                                PreparedStatement ps = Basededatos.conn.
+                                PreparedStatement ps = bd.conn.
                                         prepareStatement(sqlinsertcompra);
 
                                 ps.setString(1, codigoFactura);
@@ -679,18 +680,18 @@ private interface ItfRegistroCompra  {
                             } catch (SQLException ex) {
                                 System.out.println(ex);
                             } finally {
-                                Basededatos.desconectar();
+                                bd.desconectar();
                             }
 
                         }
                     }
-                    if (Basededatos.conectar() != null) {
+                    if (bd.conectar() != null) {
                         if (new ClaseEstado().estadoReg() == true && !"".equals(codigoFactura)) {
 
                             try {
                                 int i = 1;
                                 for (DetalleCompra c : ldc) {
-                                    PreparedStatement ps = Basededatos.conn.
+                                    PreparedStatement ps = bd.conn.
                                             prepareStatement(sqldetallecompra);
 
                                     ps.setInt(1, c.getCantidadDetalle());
@@ -705,7 +706,7 @@ private interface ItfRegistroCompra  {
                                     content1[i][2] = "" + c.getSubtotal();
                                     content1[i][3] = "" + c.getNombreprovee();
 
-                                    PreparedStatement ps2 = Basededatos.conn.
+                                    PreparedStatement ps2 = bd.conn.
                                             prepareStatement(sqlupdateproducto);
                                     ps2.setInt(1, c.getCantidadDetalle());
                                     ps2.setInt(2, c.getProducto_idproducto());
@@ -730,7 +731,7 @@ private interface ItfRegistroCompra  {
                             } catch (SQLException wr) {
                                 System.out.println(wr);
                             } finally {
-                                Basededatos.desconectar();
+                                bd.desconectar();
                                 ldc.clear();
                                 ClaseMensaje.miMensajeAprovado();
                             }
@@ -742,7 +743,7 @@ private interface ItfRegistroCompra  {
                         PDPage page = new PDPage();
                         doc.addPage(page);
 
-                        try (PDPageContentStream contentStream = new PDPageContentStream(doc, page)) {
+                        try ( PDPageContentStream contentStream = new PDPageContentStream(doc, page)) {
 
                             drawTable(page, contentStream, 700.0f, 100.0f, content1);
                         }
@@ -751,6 +752,7 @@ private interface ItfRegistroCompra  {
                     } catch (IOException hg) {
                         System.out.println(hg);
                     }
+                }
                 } else {
                     JOptionPane.showMessageDialog(null, "carrito vacio", "mensaje", 2);
                 }

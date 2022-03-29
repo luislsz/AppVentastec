@@ -436,11 +436,10 @@
     <Component class="javax.swing.JComboBox" name="cmbtipo">
       <Properties>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-          <StringArray count="4">
+          <StringArray count="3">
             <StringItem index="0" value="tecnologia"/>
             <StringItem index="1" value="accesorio"/>
-            <StringItem index="2" value="insumo"/>
-            <StringItem index="3" value="otro"/>
+            <StringItem index="2" value="otro"/>
           </StringArray>
         </Property>
         <Property name="doubleBuffered" type="boolean" value="true"/>

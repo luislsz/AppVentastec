@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.table.DefaultTableModel;
 
-public class FrmInventario extends javax.swing.JFrame implements ItfFrmInventario{
+public class FrmInventario extends javax.swing.JFrame implements ItfFrmInventario {
 
     private List<DetalleCompra> ldcfinal = new LinkedList<>();
     private List<DetalleVenta> ldvfinal = new LinkedList<>();
@@ -26,20 +26,13 @@ public class FrmInventario extends javax.swing.JFrame implements ItfFrmInventari
      */
     public FrmInventario() {
         initComponents();
-        carga();
-       
-    }
-    
-    @Override
-    public void carga(){
-     this.getContentPane().setBackground(Color.WHITE);
+        this.getContentPane().setBackground(Color.WHITE);
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        txtidproducto.setText(String.valueOf(0));
         txtidproducto.setEditable(false);
         BuscarProducto bp = new BuscarProducto();
         bp.start();
     }
-    
+
     @Override
     public void setLdcfinal(List<DetalleCompra> ldcfinal) {
         this.ldcfinal = ldcfinal;
@@ -262,7 +255,7 @@ public class FrmInventario extends javax.swing.JFrame implements ItfFrmInventari
         jLabel11.setText("Tipo:");
         jLabel11.setDoubleBuffered(true);
 
-        cmbtipo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "tecnologia", "accesorio", "insumo", "otro" }));
+        cmbtipo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "tecnologia", "accesorio", "otro" }));
         cmbtipo.setDoubleBuffered(true);
 
         jLabel12.setText("Gama:");
@@ -479,14 +472,16 @@ public class FrmInventario extends javax.swing.JFrame implements ItfFrmInventari
         FormCompras frt = new FormCompras();
         frt.setEnabled(true);
         frt.setVisible(true);
-        frt.setLdc(ldcfinal);
+        if (ldcfinal instanceof DetalleCompra) {
+            frt.setLdc(ldcfinal);
+        }
 
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        Producto pdc = new Producto();
-        if (!"".equals(txtnombre.getText()) && Integer.parseInt(txtidproducto.getText()) == 0) {
+        Producto pdc = Producto.getInstance();
+        if ((!"".equals(txtnombre.getText()) && Integer.parseInt(txtidproducto.getText()) == 0) && pdc instanceof Producto) {
             pdc.setGama(cmbgama.getSelectedItem().toString());
             pdc.setMarca(txtmarca.getText());
             pdc.setMemoriaExterna(txtmemoriainterna.getText());
@@ -518,8 +513,8 @@ public class FrmInventario extends javax.swing.JFrame implements ItfFrmInventari
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
-        Producto pdc = new Producto();
-        if (Integer.parseInt(txtidproducto.getText()) > 0) {
+        Producto pdc = Producto.getInstance();
+        if (Integer.parseInt(txtidproducto.getText()) > 0 && pdc instanceof Producto) {
             pdc.setIdProducto(Integer.parseInt(txtidproducto.getText()));
             pdc.start();
             ClaseMensaje.miMensajeEliminado();
@@ -531,8 +526,8 @@ public class FrmInventario extends javax.swing.JFrame implements ItfFrmInventari
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
-        Producto pdc = new Producto();
-        if (!"".equals(txtnombre.getText()) && Integer.parseInt(txtidproducto.getText()) > 0) {
+        Producto pdc = Producto.getInstance();
+        if ((!"".equals(txtnombre.getText()) && Integer.parseInt(txtidproducto.getText()) > 0) && pdc instanceof Producto) {
             pdc.setIdProducto(Integer.parseInt(txtidproducto.getText()));
             pdc.setGama(cmbgama.getSelectedItem().toString());
             pdc.setMarca(txtmarca.getText());
@@ -642,24 +637,24 @@ public class FrmInventario extends javax.swing.JFrame implements ItfFrmInventari
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
         // TODO add your handling code here:
-   this.setEnabled(false);
+        this.setEnabled(false);
         this.setVisible(false);
         FrmVentas frt = new FrmVentas();
         frt.setEnabled(true);
         frt.setVisible(true);
-        frt.setLdv(ldvfinal);
-     
+        if (ldvfinal instanceof DetalleVenta) {
+            frt.setLdv(ldvfinal);
+        }
     }//GEN-LAST:event_jButton7ActionPerformed
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
         // TODO add your handling code here:
-        FrmPrincipal frd= new FrmPrincipal();
+        FrmPrincipal frd = new FrmPrincipal();
         frd.setEnabled(true);
         frd.setVisible(true);
         this.setEnabled(false);
         this.setVisible(false);
     }//GEN-LAST:event_formWindowClosed
-
     @Override
     public void evaltextYnum(java.awt.event.KeyEvent tyea) {
         char c = tyea.getKeyChar();
@@ -759,14 +754,11 @@ public class FrmInventario extends javax.swing.JFrame implements ItfFrmInventari
     private javax.swing.JTextField txtstock;
     private javax.swing.JTextField txtvalunitario;
     // End of variables declaration//GEN-END:variables
-private interface ItfBuscarProducto  {
-     void run();
-}
-    private class BuscarProducto extends Thread implements ItfBuscarProducto{
+private class BuscarProducto extends Thread {
 
         @Override
         public void run() {
-
+            Basededatos bd = Basededatos.getInstance();
             try {
                 DefaultTableModel modelo = new DefaultTableModel();
 
@@ -783,11 +775,11 @@ private interface ItfBuscarProducto  {
                 modelo.addColumn("Descripcion");
                 modelo.addColumn("Stock");
                 jTable1.setModel(modelo);
-                if (Basededatos.conectar() != null) {
+                if (bd.conectar() != null) {
 
                     String sql = "Select * from Producto where nombre like '%" + jTextnomProduc.getText() + "%'";
 
-                    Statement ps = Basededatos.conn.createStatement();
+                    Statement ps = bd.conn.createStatement();
                     ResultSet rs = ps.executeQuery(sql);
 
                     while (rs.next()) {
@@ -808,7 +800,7 @@ private interface ItfBuscarProducto  {
                     }
 
                     jTable1.setModel(modelo);
-                    Basededatos.desconectar();
+                    bd.desconectar();
                     //la lista
 
                 }

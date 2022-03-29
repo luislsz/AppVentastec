@@ -236,13 +236,14 @@ public class FrmInformeProducVentas extends javax.swing.JFrame {
     }
 
     private int consultMes(int mes) {
+        Basededatos bd= Basededatos.getInstance();
         Double result = null;
-        if (Basededatos.conectar() != null) {
+        if (bd.conectar() != null) {
 
             String sql = consultames + mes;
 
             try {
-                Statement ps = Basededatos.conn.createStatement();
+                Statement ps = bd.conn.createStatement();
                 ResultSet rs = ps.executeQuery(sql);
                 if (rs.next()) {
                     result = rs.getDouble("sum(total)");

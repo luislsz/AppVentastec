@@ -14,5 +14,5 @@ public interface ItfFrmInventario {
     
     void evalnum(java.awt.event.KeyEvent ohynu);
     
-    public void carga();
+    
 }
